@@ -1,0 +1,42 @@
+# This R environment comes with all of CRAN preinstalled, as well as many other helpful packages
+# The environment is defined by the kaggle/rstats docker image: https://github.com/kaggle/docker-rstats
+# For example, here's several helpful packages to load in 
+
+library(ggplot2) # Data visualization
+library(dplyr) # Pipeline etc
+library(readr) # CSV file I/O, e.g. the read_csv function
+library(sqldf) # SQLite database
+
+# Input data files are available in the "../input/" directory.
+# For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
+
+# Connect to data base ----------------------------------------------------
+con <- dbConnect(SQLite(), dbname="../input/database.sqlite")
+# list all tables
+dbListTables(con)
+
+player       <- tbl_df(dbGetQuery(con,"SELECT * FROM player"))
+# player_stats <- tbl_df(dbGetQuery(con,"SELECT * FROM player_stats"))
+Match        <- tbl_df(dbGetQuery(con,"SELECT * FROM Match"))
+Team        <- tbl_df(dbGetQuery(con,"SELECT * FROM Team"))
+Country        <- tbl_df(dbGetQuery(con,"SELECT * FROM Country"))
+League        <- tbl_df(dbGetQuery(con,"SELECT * FROM League"))
+
+# disconnect
+dbDisconnect(con)
+# -------------------------------
+
+# select columns 
+
+player  <- select(player,player_api_id, player_name) # use player_api_id as key for join
+Team    <- select(Team, team_api_id, team_long_name, team_short_name) # use team_api_id as key for join
+Country <-select(Country, id, name) %>% rename(country_id = id)  %>% rename(country_name = name)   # use country_id as key for join
+League  <- select(League, country_id, name) %>% rename(league_name = name) # use country_id as key for join
+Match   <-select(Match, id, country_id, league_id, season, stage, date, match_api_id, home_team_api_id, away_team_api_id, home_team_goal, away_team_goal, home_player_1, home_player_2, home_player_3, home_player_4, home_player_5, home_player_6, home_player_7, home_player_8, home_player_9, home_player_10, home_player_11, away_player_1, away_player_2, away_player_3, away_player_4, away_player_5, away_player_6, away_player_7, away_player_8, away_player_9, away_player_10, away_player_11, goal, shoton, shotoff, foulcommit, card, cross, corner, possession)
+
+### Data structure
+ names(player)
+ names(Team)
+ names(Country)
+ names(League)
+ names(Match)
